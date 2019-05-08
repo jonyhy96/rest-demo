@@ -1,0 +1,49 @@
+version: '3.5'
+
+networks:
+  default:
+    name: default
+
+services:
+  rest-demo:
+    build:
+      context: .
+    image: rest-demo
+    container_name: rest-demo
+    environment:
+      APP_ADDR: 0.0.0.0
+      APP_PORT: 8888
+      DB_HOST: postgres
+    ports:
+      - 8080:8888
+      - 8088:8088
+    depends_on:
+      - postgres
+    networks:
+      - default      
+  postgres:
+    build:
+      context: ./db
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: default
+      POSTGRES_DB: default
+      POSTGRES_PASSWORD: default
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    networks:
+      - default
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin    
+    restart: always
+    ports:
+      - 8000:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: default@domain.com
+      PGADMIN_DEFAULT_PASSWORD: domain
+    networks:
+      - default

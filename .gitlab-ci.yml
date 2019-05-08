@@ -1,0 +1,42 @@
+before_script:  
+  - export TAG=latest
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  image: golang:1.11.2
+  stage: build
+  before_script:
+    - mkdir -p /go/src/ /go/src/_/builds
+    - cp -r $CI_PROJECT_DIR /go/src/rest-demo
+    - cd /go/src/rest-demo
+  script: make build
+
+push image:
+  stage: deploy
+  only:
+    - master
+  script: 
+    - docker ps
+    - docker login registry.domain.com -u gitlab-ci -p Gitlabci123
+    - docker build -t registry.domain.com/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME:$TAG .
+    - docker push registry.domain.com/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME:$TAG
+
+test:
+  image: golang:1.11.2
+  stage: test
+  before_script:
+    - mkdir -p /go/src/ /go/src/_/builds
+    - cp -r $CI_PROJECT_DIR /go/src/rest-demo
+    - cd /go/src/rest-demo  
+  script: make test
+
+deploy:
+  stage: deploy
+  only:
+    - master  
+  script: 
+    - echo "deploy"
